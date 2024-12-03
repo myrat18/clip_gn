@@ -23,7 +23,7 @@ if drive_link:
 
         # Button for next steps
         if st.button("Start clip generation"):
-            st.write("Further actions can be implemented here.")
+            st.write("Backend logic is missing")
 
     except Exception as e:
         st.error(f"Error downloading video: {e}")
