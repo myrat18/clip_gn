@@ -1,47 +1,29 @@
-import os
-import shutil
-import tempfile
 import streamlit as st
-from ultralytics import YOLO
+import tempfile
+import gdown
+import os
 
-# Initialize YOLO model
-model = YOLO('yolov8n.pt')
+st.title("Google Drive Video Viewer")
 
-st.title("YOLOv8 Video Processor")
+# Input for Google Drive link
+drive_link = st.text_input("Enter the Google Drive video link:")
 
-# Upload a video file
-uploaded_video = st.file_uploader("Upload a video", type=["mp4", "avi", "mov"])
+if drive_link:
+    try:
+        # Download the video from Google Drive
+        temp_dir = tempfile.mkdtemp()
+        video_path = os.path.join(temp_dir, "downloaded_video.mp4")
 
-if uploaded_video:
-    # Save the video to a temporary directory
-    temp_dir = tempfile.mkdtemp()
-    video_path = os.path.join(temp_dir, uploaded_video.name)
-    with open(video_path, 'wb') as f:
-        f.write(uploaded_video.read())
-    st.video(video_path)
+        st.write("Downloading video...")
+        gdown.download(url=drive_link, output=video_path, quiet=False)
+        st.success("Video downloaded successfully!")
 
-    # Process video with YOLO
-    if st.button("Run YOLO Inference"):
-        output_dir = os.path.join(temp_dir, "yolo_results")
-        os.makedirs(output_dir, exist_ok=True)
+        # Display the video
+        st.video(video_path)
 
-        results = model.predict(source=video_path, save=True, save_dir=output_dir)
-        output_files = [f for f in os.listdir(output_dir) if f.endswith(('.mp4', '.avi'))]
+        # Button for next steps
+        if st.button("Do Something"):
+            st.write("Further actions can be implemented here.")
 
-        if output_files:
-            output_video = os.path.join(output_dir, output_files[0])
-            st.success("Inference Completed!")
-            st.video(output_video)
-
-            with open(output_video, "rb") as f:
-                st.download_button(
-                    "Download Processed Video",
-                    data=f,
-                    file_name=f"processed_{uploaded_video.name}",
-                    mime="video/mp4"
-                )
-        else:
-            st.error("No output video found.")
-
-    # Cleanup
-    shutil.rmtree(temp_dir)
+    except Exception as e:
+        st.error(f"Error downloading video: {e}")
