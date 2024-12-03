@@ -5,7 +5,7 @@ import tempfile
 import streamlit as st
 from ultralytics import YOLO
 
-model = YOLO('/Users/myrat/Desktop/test/goalpost_best.pt')
+model = YOLO('yolov8n.pt')
 
 st.title("Highlighter test")
 
