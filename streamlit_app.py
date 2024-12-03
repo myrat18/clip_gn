@@ -1,42 +1,42 @@
-import streamlit as st
-import gdown
 import os
+import cv2
+import shutil
+import tempfile
+import streamlit as st
+from ultralytics import YOLO
 
-def download_video_from_gdrive(gdrive_url):
-    """Download video from a Google Drive link using gdown."""
-    try:
-        output = "temp_video.mp4"
-        gdown.download(gdrive_url, output, quiet=False)
-        return output
-    except Exception as e:
-        return None
+model = YOLO('/Users/myrat/Desktop/test/goalpost_best.pt')
 
-def app():
-    st.title("Google Drive Video Player and Clip Generator")
+st.title("Highlighter test")
 
-    # Input for the Google Drive link
-    gdrive_url = st.text_input("Enter a Google Drive video URL (direct link):")
+uploaded_file = st.file_uploader("Upload test video", type=["mp4", "avi", "mov"])
 
-    if gdrive_url:
-        st.info("Ensure the Google Drive link is in a shareable or direct download format.")
-        
-        if st.button("Download and Play Video"):
-            with st.spinner("Downloading video..."):
-                video_path = download_video_from_gdrive(gdrive_url)
-                
-                if video_path:
-                    st.success("Video downloaded successfully!")
-                    st.video(video_path)
-                else:
-                    st.error("Failed to download video. Please check the link format.")
+if uploaded_file is not None:
+    temp_dir = tempfile.mkdtemp()
+    video_path = os.path.join(temp_dir, uploaded_file.name)
 
-    # Generate Clip button
-    if st.button("Generate Clip"):
-        st.success("Generate Clip button clicked! Add your processing logic here.")
+    with open(video_path, 'wb') as f:
+        f.write(uploaded_file.read())
 
-    # Clean up downloaded video on app stop
-    if os.path.exists("temp_video.mp4"):
-        os.remove("temp_video.mp4")
+    st.video(video_path)
 
-if __name__ == "__main__":
-    app()
+    if st.button("Run YOLO inference"):
+        results = model.predict(source=video_path, save=True)
+        output_dir = results[-2].save_dir
+        uploaded_file.name = uploaded_file.name.replace('mov', 'avi')
+        uploaded_file.name = uploaded_file.name.replace('mp4', 'avi')
+        output_video_path = os.path.join(output_dir, uploaded_file.name)
+
+        st.success("Inference completed!")
+        st.video(output_video_path)
+
+        with open(output_video_path, "rb") as f:
+            st.download_button(
+                label="Download result video",
+                data=f,
+                file_name="processed_" + uploaded_file.name,
+                mime="video/mp4"
+            )
+
+    if os.path.exists(temp_dir):
+        shutil.rmtree(temp_dir)
