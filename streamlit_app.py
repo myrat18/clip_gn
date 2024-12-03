@@ -5,8 +5,12 @@ import os
 
 def convert_to_drive_direct_url(google_drive_link):
     """Convert Google Drive share link to direct download link."""
-    file_id = google_drive_link.split('id=')[1].split('&')[0]
-    return f"https://drive.google.com/uc?export=download&id={file_id}"
+    try:
+        file_id = google_drive_link.split('/d/')[1].split('/')[0]
+        return f"https://drive.google.com/uc?export=download&id={file_id}"
+    except IndexError:
+        raise ValueError("Invalid Google Drive URL. Ensure it is in the correct format.")
+
 
 st.title("Google Drive Video Viewer")
 
