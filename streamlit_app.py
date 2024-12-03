@@ -12,10 +12,10 @@ def convert_to_drive_direct_url(google_drive_link):
         raise ValueError("Invalid Google Drive URL. Ensure it is in the correct format.")
 
 
-st.title("Google Drive Video Viewer")
+st.title("Highlighter-app-demo")
 
 # Input for Google Drive link
-drive_link = st.text_input("Enter the Google Drive video link:")
+drive_link = st.text_input("Enter the video link:")
 
 if drive_link:
     try:
@@ -34,8 +34,8 @@ if drive_link:
         st.video(video_path)
 
         # Button for next steps
-        if st.button("Do Something"):
-            st.write("Further actions can be implemented here.")
+        if st.button("Start clip generation"):
+            st.write("WARNING: Backend logic is missing")
 
     except Exception as e:
         st.error(f"Error downloading video: {e}")
